@@ -16,3 +16,4 @@ The writer_server.rb did all the work.`process(follow_json)` is called everytime
 
 The cache and database is shared with the **[User service](github.com/Fantastic-Four124/userservice)** and **[Follow service](github.com/Fantastic-Four124/nanotwitter-follow-service)**.
 
+Unicorn is chosen as the http server, becuase RabbitMQ is implemented with unicorn. It's also highly multi-threaded. Better performance can be achieved. 

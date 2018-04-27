@@ -37,23 +37,14 @@ class FollowerServer
       puts "[x] Get message #{payload}. Gonna do some user service about #{payload}"
       result = process(payload)
       puts result
-      #byebug
-      # exchange.publish(
-      #   result,
-      #   routing_key: properties.reply_to,
-      #   correlation_id: properties.correlation_id
-      # )
     end
   end
 
   # eg. {"leader_id":":5","user_id":"2","isFo":true}
   def process(follow_json)
-    # follow_json['follower_id'], follow_json['leader_id'] get be integers
-    # follow_json['isFo'] is bool
     puts '#TrustTheProcess'
     puts follow_json
     input = JSON.parse follow_json
-    # return 'ojbk'
     if input['isFo'] 
       follower_follow_leader(input['user_id'], input['leader_id'])
     else
@@ -63,8 +54,10 @@ class FollowerServer
 
 end
 
+# Do follow
 def follower_follow_leader(follower_id, leader_id)
   update_cache_follow(follower_id, leader_id, true)
+  # update cache first, for high availibility
   puts "follower_id: #{follower_id}"
   puts "leader_id: #{leader_id}"
   link = Follow.find_by(user_id: follower_id, leader_id: leader_id)
@@ -79,8 +72,10 @@ def follower_follow_leader(follower_id, leader_id)
   end
 end
 
+# Do unfollow
 def follower_unfollow_leader(follower_id, leader_id)
-  update_cache_follow(follower_id, leader_id, false)
+  update_cache_follow(follower_id, leader_id, false) 
+  # update cache first, for high availibility
   link = Follow.find_by(user_id: follower_id, leader_id: leader_id)
   if !link.nil?
     puts "follower_unfollow_leader"
@@ -88,6 +83,7 @@ def follower_unfollow_leader(follower_id, leader_id)
   end
 end
 
+# Update the cache in follow and user service
 def update_cache_follow(follower_id, leader_id, isFollowing)
   redis_leader_key = "#{leader_id} followers"
   redis_user_key = "#{follower_id} leaders"
@@ -114,6 +110,7 @@ def update_cache_follow(follower_id, leader_id, isFollowing)
   $redisUserServiceCache.set(leader_id, leader_info_map.to_json) if !leader_info_map.nil?
 end
 
+# Helper method
 def get_leaders_followers_map(redis_leader_key, redis_user_key)
   tmp1 = $redis.get(redis_leader_key)
   tmp2 = $redis.get(redis_user_key)
@@ -131,6 +128,7 @@ def get_leaders_followers_map(redis_leader_key, redis_user_key)
   return JSON.parse(tmp1), JSON.parse(tmp2)
 end
 
+# Helper method
 def get_user_obj_cache(follower_id, leader_id)
   tmp3 = $redisUserServiceCache.get(follower_id)
   tmp4 = $redisUserServiceCache.get(leader_id)
@@ -146,7 +144,5 @@ def get_user_obj_cache(follower_id, leader_id)
   else
     leader_info_map = JSON.parse tmp4
   end
-  # puts users_info_map
-  # puts leader_info_map
   return users_info_map, leader_info_map
 end
