@@ -73,9 +73,9 @@ def follower_follow_leader(follower_id, leader_id)
     relation = Follow.new
     relation.user_id = follower_id
     relation.leader_id = leader_id
-    relation.follow_date = Time.now        
+    relation.follow_date = Time.now
     bl = relation.save
-    puts bl 
+    puts bl
   end
 end
 
