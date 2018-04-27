@@ -17,3 +17,6 @@ The writer_server.rb did all the work.`process(follow_json)` is called everytime
 The cache and database is shared with the **[User service](github.com/Fantastic-Four124/userservice)** and **[Follow service](github.com/Fantastic-Four124/nanotwitter-follow-service)**.
 
 Unicorn is chosen as the http server, becuase RabbitMQ is implemented with unicorn. It's also highly multi-threaded. Better performance can be achieved. 
+
+server.rb literally does nothing in this case.
+One of the annoying thing about the RabbitMQ is that the service is always in sleep and it's managed by Heroku. We have to do REST call manually to wake up the service. Calling /status will wake up the service. Only listening to the queue not enough for the lazy rabbit.
